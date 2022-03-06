@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import FileInput from './components/FileInput/FileInput';
 
 //Styles: 
-import './App.css';
+import classes from './App.module.css';
 
 
 
@@ -12,16 +12,22 @@ function App() {
 
 
     const [parsedCsvData, setParsedCsvData] = useState(null);
-    const [selectedFormat, setSelectedFormat] = useState("") //TODO: Add the selected format option. 
+    const [selectedFormat, setSelectedFormat] = useState("YYYY-MM-DD");
     const [commonDays, setCommonDays] = useState(null);
     const [mostCommonDaysData, setMotCommonDayData] = useState(null);
     const [errors, setError] = useState({
         hasError: false,
         errorsCount: 0,
         type: "",
-    })
+    });
 
 
+    const clearState = () => {
+        setParsedCsvData(null);
+        setSelectedFormat("YYYY-MM-DD");
+        setCommonDays(null);
+        setMotCommonDayData(null);
+    }
 
     const calculateCommonDays = (duration1, duration2) => {
         let result = 0; // No days overlapping. 
@@ -76,8 +82,9 @@ function App() {
                 i = current; //No need to increment i, it will be done when the loop starts again. 
             }
         }
+        console.log(result);
         return result;
-    }
+    };
 
 
     useEffect(() => {
@@ -110,7 +117,7 @@ function App() {
 
         }
         return { pair: pairWithMaxDays, days: maxPairDays };
-    }
+    };
 
     useEffect(() => {
         if (commonDays !== null) {
@@ -126,44 +133,68 @@ function App() {
         const pairArr = pairName.split("-");
         for (let proj in data) {
             result.push(
-                <div>
-                    <div>
+                <div className={classes.pairInfo}>
+                    <div className={classes.pairDetailCell}>
                         {pairArr[0]}
                     </div>
-                    <div>
+                    <div className={classes.pairDetailCell}>
                         {pairArr[1]}
                     </div>
-                    <div>
+                    <div className={classes.pairDetailCell}>
                         {proj}
                     </div>
-                    <div>
+                    <div className={classes.pairDetailCell}>
                         {data[proj]}
                     </div>
                 </div>
             )
         }
         return result;
-    }
+    };
+
+    const onFormatChangeHandler = (e) => {
+        setSelectedFormat(e.target.value)
+    };
 
     return (
-        <div className="App">
+        <div className={classes.App}>
+            <div className={classes.formatTitle}>Please select the format your .CSV file uses:</div>
+            <div className={classes.formatsContainer}>
+                <div>
+                    <label htmlFor='formatThree'>YYYY MM DD</label>
+                    <input id="formatThree" type={"radio"} name="selectedFormat" value="YYYY-MM-DD" onChange={onFormatChangeHandler} checked={selectedFormat === "YYYY-MM-DD"} />
+                </div>
+                <div>
+                    <label htmlFor='formatOne'>DD MM YYYY</label>
+                    <input id="formatOne" type={"radio"} name="selectedFormat" value="DD-MM-YYYY" onChange={onFormatChangeHandler} checked={selectedFormat === "DD-MM-YYYY"} />
+                </div>
 
-            <FileInput setParsedCsvData={setParsedCsvData} setErrorState={setError} ></FileInput>
+                <div>
+                    <label htmlFor='formatTwo'>MM DD YYYY</label>
+                    <input id="formatTwo" type={"radio"} name="selectedFormat" value="MM-DD-YYYY" onChange={onFormatChangeHandler} checked={selectedFormat === "MM-DD-YYYY"} />
+                </div>
+
+
+            </div>
+
+            <FileInput
+                format={selectedFormat}
+                setParsedCsvData={setParsedCsvData}
+                setErrorState={setError}
+                clearState={clearState}
+            ></FileInput>
 
             {
                 mostCommonDaysData !== null ?
                     <>
-                        <div> The pair with most common days is: pair {mostCommonDaysData.pair.split("-").join(", ")}, {mostCommonDaysData.days} </div>
-                        {
-                            errors.type === "records" &&
-                            <div>There are {errors.errorsCount} errors, the corresponding records were ignored. Please verify your data.</div>
-                        }
+                        <div className={classes.pairDetails}> The pair with most common days is: pair {mostCommonDaysData.pair.split("-").join(", ")}, {mostCommonDaysData.days} </div>
+
                         <div>
-                            <div >
-                                <div>Employee ID #1</div>
-                                <div>Employee ID #2</div>
-                                <div>Project ID</div>
-                                <div>Days worked</div>
+                            <div className={classes.headers}>
+                                <div className={classes.pairDetailCell}>Employee ID #1</div>
+                                <div className={classes.pairDetailCell}>Employee ID #2</div>
+                                <div className={classes.pairDetailCell}>Project ID</div>
+                                <div className={classes.pairDetailCell}>Days worked</div>
                             </div>
 
                             {preparePairDataForDisplay(commonDays[mostCommonDaysData.pair], mostCommonDaysData.pair)}
@@ -176,8 +207,12 @@ function App() {
             }
             {
                 errors.type === "file" ?
-                    <div>Please upload a .CSV file</div>
+                    <div className={classes.error}>Please upload a .CSV file</div>
                     : null
+            }
+            {
+                errors.type === "records" &&
+                <div className={classes.error}>There are {errors.errorsCount} errors, the corresponding records were ignored. Please verify your data.</div>
             }
         </div>
     );

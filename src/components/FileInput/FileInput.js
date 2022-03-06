@@ -1,14 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import Papa from 'papaparse';
 
+import classes from "./FileInput.module.css";
+
 const FileInput = (props) => {
-    //TODO: Add a clear button for the file
+
     const [uploadedFile, setUploadedFile] = useState(null);
 
     const fileUploadHandler = (event) => {
         setUploadedFile(event.target.files[0]);
     };
-
 
     const validateRecord = (record) => {
 
@@ -29,38 +30,50 @@ const FileInput = (props) => {
         return isValid;
     }
 
-    //TODO: Add functionality for all date formats: 
-    const prepareDate = (data) => {
+    const prepareDate = (date, formatStr) => {
         let result;
-        if (data === "NULL") {
+
+        if (date === "NULL") {
             const temp = new Date();
             result = Date.UTC(temp.getFullYear(), temp.getMonth(), temp.getDate(), 0, 0, 0);
-            console.log(result);
+
         } else {
-            const temp = data.split("-");
-            result = Date.UTC(temp[0], temp[1] - 1, temp[2], 0, 0, 0); //Months are 0 based, hence the -1 
-            console.log(result);
+            const temp = date.replace(/\D/g, '');
+            const format = formatStr.split("-");
+            let year, month, day = "";
+            //Months are 0 based, hence the -1 
+            if (format[0] === "DD" && date !== "") {
+                year = temp.slice(4);
+                month = temp.slice(2, 4) - 1;
+                day = temp.slice(0, 2);
+            } else if (format[0] === "MM" && date !== "") {
+                year = temp.slice(4);
+                month = temp.slice(0, 2) - 1;
+                day = temp.slice(2, 4);
+            } else if (format[0] === "YYYY" && date !== "") {
+                year = temp.slice(0, 4);
+                month = temp.slice(4, 6) - 1;
+                day = temp.slice(6);
+            }
+            result = Date.UTC(year, month, day, 0, 0, 0)
         }
-
-
-        return result
-    }
+        return result;
+    };
 
     useEffect(() => {
         if (uploadedFile) {
-            console.log(uploadedFile)
             if (uploadedFile.type !== 'text/csv') {
                 props.setErrorState({ hasError: true, errorsCount: 0, type: "file" });
+                props.clearState();
             } else {
                 Papa.parse(uploadedFile, {
                     header: true, skipEmptyLines: "greedy", complete: res => {
-                        console.log(res.data);
                         const temp = [];
                         let errorsCount = 0;
 
                         res.data.map((el) => {
-                            el.DateFrom = prepareDate(el.DateFrom);
-                            el.DateTo = prepareDate(el.DateTo);
+                            el.DateFrom = prepareDate(el.DateFrom, props.format);
+                            el.DateTo = prepareDate(el.DateTo, props.format);
                             const recordIsValid = validateRecord(el);
 
                             if (recordIsValid) {
@@ -70,6 +83,8 @@ const FileInput = (props) => {
                                 props.setErrorState({ hasError: true, errorsCount: errorsCount, type: "records" })
                             }
                         })
+                        console.log(temp);
+                        console.log(res.data)
                         props.setParsedCsvData(temp);
 
                     }
@@ -80,7 +95,7 @@ const FileInput = (props) => {
         // eslint-disable-next-line
     }, [uploadedFile]);
 
-    return <input type='file' onChange={fileUploadHandler} />
+    return <input className={classes.input} type='file' onChange={fileUploadHandler} />
 }
 
 
