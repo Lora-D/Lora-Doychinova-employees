@@ -1,0 +1,34 @@
+.App {
+  text-align: center;
+  padding: 5vh 5vw;
+}
+
+.formatTitle {
+    border: 1px solid black;
+}
+.formatsContainer{
+    display: flex; 
+    justify-content: space-around;
+    margin: 2vh 0;
+}
+.pairDetails {
+    margin: 0.75vh 0;
+}
+.headers{
+    display: flex;
+    justify-content: space-around;
+
+}
+.pairInfo {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 0.75vh;
+}
+.pairDetailCell{
+    min-width: 20vw;
+    border: 1px solid black;
+}
+.error {
+    background-color: lightsalmon;
+    font-weight: bold;
+}
