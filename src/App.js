@@ -21,7 +21,9 @@ function App() {
         type: "",
     });
 
-
+    /**
+     * Clears the previously displayed data, if any
+     */
     const clearState = () => {
         setParsedCsvData(null);
         setSelectedFormat("YYYY-MM-DD");
@@ -29,6 +31,12 @@ function App() {
         setMotCommonDayData(null);
     }
 
+    /**
+     * Used to calculate how many days, if any, are overlapping in two time periods.
+     * @param {Array} duration1 of dates in UTC format
+     * @param {Array} duration2 of dates in UTC format
+     * @returns the number of days which overlap for the two intervals
+     */
     const calculateCommonDays = (duration1, duration2) => {
         let result = 0; // No days overlapping. 
 
@@ -48,6 +56,11 @@ function App() {
         return result;
     };
 
+    /**
+     * Calculates the common days each pair of employees has on a common project. Arranges the data based on employee pairs and then project
+     * @param {Object} data containing the data for employees involvment in projects 
+     * @returns {Object} containing emploee pairs as properies, each associated to an object containing project ID - common days 
+     */
     const processParsedData = (data) => {
 
         const result = {};
@@ -96,7 +109,11 @@ function App() {
         // eslint-disable-next-line
     }, [parsedCsvData]);
 
-
+    /**
+     * 
+     * @param {Object} data containing pair - projects information
+     * @returns {Object} specifying the name of the pair with most days and the number of those days.
+     */
     const calculateMostCommonDays = (data) => {
 
         let pairWithMaxDays = "none";
